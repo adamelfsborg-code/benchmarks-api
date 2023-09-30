@@ -5,57 +5,48 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/adamelfsborg-code/benchmarks-api/internal/api/config"
-	"github.com/adamelfsborg-code/benchmarks-api/internal/api/database"
-	"github.com/adamelfsborg-code/benchmarks-api/internal/api/router"
 )
 
 type App struct {
-	Router   router.Router
-	Database database.Database
-	Config   config.Config
+	router   http.Handler
+	database Database
+	config   Config
 }
 
 func Build(ctx context.Context) (*App, error) {
-	r, err := router.Build()
-	if err != nil {
-		fmt.Printf("Failed to build router: %v", err)
-		return nil, err
-	}
-
-	c, err := config.Build()
+	c, err := loadConfig()
 	if err != nil {
 		fmt.Printf("Failed to build config: %v", err)
 		return nil, err
 	}
 
-	dc := &database.DatabaseConn{
+	dc := &DatabaseConn{
 		Addr:     c.DBAddr,
 		Database: c.DBDatabase,
 		User:     c.DBUser,
 		Password: c.DBPassword,
 	}
 
-	d, err := dc.Build(ctx)
+	d, err := dc.loadDatabase(ctx)
 	if err != nil {
 		fmt.Printf("Failed to build database: %v", err)
 		return nil, err
 	}
 
 	app := &App{
-		Router:   r,
-		Config:   c,
-		Database: *d,
+		config:   c,
+		database: *d,
 	}
+
+	app.loadRoutes()
 
 	return app, nil
 }
 
 func (a *App) Start(ctx context.Context) error {
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", a.Config.ServerPort),
-		Handler: a.Router.Handler,
+		Addr:    fmt.Sprintf(":%d", a.config.ServerPort),
+		Handler: a.router,
 	}
 
 	fmt.Println("Starting Server!")

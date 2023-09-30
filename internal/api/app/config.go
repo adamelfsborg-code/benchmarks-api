@@ -1,4 +1,4 @@
-package config
+package app
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type Config struct {
 	DBDatabase string
 }
 
-func Build() (Config, error) {
+func loadConfig() (Config, error) {
 	err := godotenv.Load(".env")
 	if err != nil {
 		return Config{}, fmt.Errorf("Failed to load Config: %w", err)

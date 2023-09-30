@@ -1,4 +1,4 @@
-package database
+package app
 
 import (
 	"context"
@@ -18,7 +18,7 @@ type DatabaseConn struct {
 	Database string
 }
 
-func (d *DatabaseConn) Build(ctx context.Context) (*Database, error) {
+func (d *DatabaseConn) loadDatabase(ctx context.Context) (*Database, error) {
 	con := pg.Connect(&pg.Options{
 		Addr:     d.Addr,
 		User:     d.User,
