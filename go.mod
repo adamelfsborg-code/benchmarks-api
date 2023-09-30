@@ -1,4 +1,4 @@
-module github.com/adamelfsborg-code/test-api
+module github.com/adamelfsborg-code/benchmarks-api
 
 go 1.21.1
 

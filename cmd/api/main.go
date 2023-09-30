@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/adamelfsborg-code/test-api/internal/api/app"
+	"github.com/adamelfsborg-code/benchmarks-api/internal/api/app"
 )
 
 func main() {

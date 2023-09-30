@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/adamelfsborg-code/test-api/internal/api/config"
-	"github.com/adamelfsborg-code/test-api/internal/api/database"
-	"github.com/adamelfsborg-code/test-api/internal/api/router"
+	"github.com/adamelfsborg-code/benchmarks-api/internal/api/config"
+	"github.com/adamelfsborg-code/benchmarks-api/internal/api/database"
+	"github.com/adamelfsborg-code/benchmarks-api/internal/api/router"
 )
 
 type App struct {
