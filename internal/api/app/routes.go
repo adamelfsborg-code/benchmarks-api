@@ -25,7 +25,7 @@ func (a *App) loadRoutes() {
 
 func (a *App) LoadBenchmarkRoutes(router chi.Router) {
 	benchmarkHandler := &benchmark.BenchmarkHandler{
-		Repo: a.database.Client,
+		Actions: a.database,
 	}
 	router.Post("/", benchmarkHandler.Create)
 }

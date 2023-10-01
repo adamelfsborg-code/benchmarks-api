@@ -7,10 +7,6 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
-type Database struct {
-	Client *pg.DB
-}
-
 type DatabaseConn struct {
 	Addr     string
 	User     string
@@ -18,7 +14,7 @@ type DatabaseConn struct {
 	Database string
 }
 
-func (d *DatabaseConn) loadDatabase(ctx context.Context) (*Database, error) {
+func (d *DatabaseConn) loadDatabase(ctx context.Context) (*pg.DB, error) {
 	con := pg.Connect(&pg.Options{
 		Addr:     d.Addr,
 		User:     d.User,
@@ -31,22 +27,26 @@ func (d *DatabaseConn) loadDatabase(ctx context.Context) (*Database, error) {
 		return nil, err
 	}
 
-	defer func() {
-		err := con.Close()
-		if err != nil {
-			fmt.Println("Failed to close Database", err)
-		}
-	}()
-
-	_, err = con.Exec("SET search_path TO testapi")
+	_, err = con.Exec("SET search_path TO benchmarks")
 
 	if err != nil {
 		return nil, err
 	}
 
-	database := &Database{
-		Client: con,
-	}
+	return con, nil
+}
 
-	return database, nil
+type QueryLogger struct{}
+
+func (q QueryLogger) BeforeQuery(c context.Context, evt *pg.QueryEvent) (context.Context, error) {
+	return c, nil
+}
+
+func (q QueryLogger) AfterQuery(c context.Context, evt *pg.QueryEvent) error {
+	query, err := evt.FormattedQuery()
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(query))
+	return nil
 }

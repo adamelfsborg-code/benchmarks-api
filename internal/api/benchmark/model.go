@@ -1,23 +1,26 @@
 package benchmark
 
+import (
+	"encoding/json"
+	"time"
+
+	"github.com/google/uuid"
+)
+
 type Benchmark struct {
-	Head BenchmarkHead
-	Data []BenchmarkRow
+	Head BenchmarkHead `json:"head"`
+	Row  BenchmarkRow  `json:"row"`
 }
 
 type BenchmarkHead struct {
-	Operation string   `json:"operation"`
-	Timestamp string   `json:"timestamp"`
-	Tags      []string `json:"tags"`
+	ID        uuid.UUID `json:"id"`
+	Operation string    `json:"operation"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type BenchmarkRow struct {
-	Xlabel string `json:"x_label"`
-	Ylabel string `json:"y_label"`
-
-	Xvalue uint64 `json:"x_value"`
-	Yvalue uint64 `json:"y_value"`
-
-	Xunit string `json:"x_unit"`
-	Yunit string `json:"y_unit"`
+	ID          uuid.UUID       `json:"id"`
+	BenchmarkID uuid.UUID       `json:"benchmark_id"`
+	Data        json.RawMessage `json:"data"`
+	Timestamp   time.Time       `json:"timestamp"`
 }

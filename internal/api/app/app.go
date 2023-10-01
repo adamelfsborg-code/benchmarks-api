@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/adamelfsborg-code/benchmarks-api/internal/api/benchmark"
 )
 
 type App struct {
 	router   http.Handler
-	database Database
+	database benchmark.Actions
 	config   Config
 }
 
@@ -20,6 +22,8 @@ func Build(ctx context.Context) (*App, error) {
 		return nil, err
 	}
 
+	var database benchmark.Actions
+
 	dc := &DatabaseConn{
 		Addr:     c.DBAddr,
 		Database: c.DBDatabase,
@@ -27,15 +31,23 @@ func Build(ctx context.Context) (*App, error) {
 		Password: c.DBPassword,
 	}
 
-	d, err := dc.loadDatabase(ctx)
+	con, err := dc.loadDatabase(ctx)
 	if err != nil {
 		fmt.Printf("Failed to build database: %v", err)
 		return nil, err
 	}
 
+	if c.Mode == "dev" {
+		con.AddQueryHook(QueryLogger{})
+	}
+
+	database = &benchmark.Database{
+		Client: con,
+	}
+
 	app := &App{
 		config:   c,
-		database: *d,
+		database: database,
 	}
 
 	app.loadRoutes()

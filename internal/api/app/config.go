@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	ServerPort uint16
+	Mode       string
 
 	DBAddr     string
 	DBUser     string
@@ -29,6 +30,10 @@ func loadConfig() (Config, error) {
 	config := Config{}
 
 	serverPort, exists := os.LookupEnv("SERVER_PORT")
+	if exists == false {
+		return Config{}, fmt.Errorf("Failed to load Config: %w", err)
+	}
+	mode, exists := os.LookupEnv("MODE")
 	if exists == false {
 		return Config{}, fmt.Errorf("Failed to load Config: %w", err)
 	}
@@ -53,7 +58,7 @@ func loadConfig() (Config, error) {
 	if err == nil {
 		config.ServerPort = uint16(port)
 	}
-
+	config.Mode = mode
 	config.DBAddr = dbAddr
 	config.DBUser = dbUser
 	config.DBPassword = dbPassword

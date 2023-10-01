@@ -5,6 +5,7 @@ go 1.21.1
 require (
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-pg/pg/v10 v10.11.1
+	github.com/google/uuid v1.3.1
 	github.com/joho/godotenv v1.5.1
 )
 
