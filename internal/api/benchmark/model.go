@@ -8,8 +8,10 @@ import (
 )
 
 type Benchmark struct {
-	Head BenchmarkHead `json:"head"`
-	Row  BenchmarkRow  `json:"row"`
+	ID        uuid.UUID       `json:"id"`
+	Operation string          `json:"operation"`
+	Timestamp time.Time       `json:"timestamp"`
+	Data      json.RawMessage `json:"data"`
 }
 
 type BenchmarkHead struct {

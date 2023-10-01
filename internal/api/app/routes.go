@@ -28,4 +28,5 @@ func (a *App) LoadBenchmarkRoutes(router chi.Router) {
 		Actions: a.database,
 	}
 	router.Post("/", benchmarkHandler.Create)
+	router.Get("/", benchmarkHandler.List)
 }
