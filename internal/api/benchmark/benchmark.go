@@ -51,3 +51,17 @@ func (d *Database) List(ctx context.Context, page PageCursor) (FindResult, error
 		Cursor:     page.Offset + page.Size,
 	}, nil
 }
+func (d *Database) InsertDataByID(benchmarkRow BenchmarkRow) error {
+	_, err := d.Client.Exec(`
+		UPDATE benchmark_rows 
+		SET "data" = (
+			SELECT jsonb_agg(jsonb_value) FROM (
+				SELECT jsonb_array_elements("data") AS jsonb_value
+				UNION ALL
+				SELECT jsonb_array_elements(?::jsonb)
+			) AS merged_json
+		)
+		WHERE benchmark_id = ?;
+	`, benchmarkRow.Data, benchmarkRow.BenchmarkID)
+	return err
+}

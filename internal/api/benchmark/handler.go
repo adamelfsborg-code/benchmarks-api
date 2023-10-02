@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type Actions interface {
 	Create(ctx context.Context, benchmark Benchmark) error
 	List(ctx context.Context, page PageCursor) (FindResult, error)
+	InsertDataByID(benchmarkRow BenchmarkRow) error
 }
 
 type BenchmarkHandler struct {
@@ -25,6 +29,15 @@ type PageCursor struct {
 type FindResult struct {
 	Benchmarks []Benchmark
 	Cursor     uint64
+}
+
+type AddData struct {
+	ID   uuid.UUID       `json:"id"`
+	Data json.RawMessage `json:"data"`
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
 func (b *BenchmarkHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +69,7 @@ func (b *BenchmarkHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *BenchmarkHandler) List(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	cursorStr := r.URL.Query().Get("cursor")
 	if cursorStr == "" {
 		cursorStr = "0"
@@ -99,4 +113,42 @@ func (b *BenchmarkHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
+}
+
+func (b *BenchmarkHandler) InsertDataByID(w http.ResponseWriter, r *http.Request) {
+	idParam := chi.URLParam(r, "id")
+
+	benchmarkID, err := uuid.Parse(idParam)
+	if err != nil {
+		fmt.Println("Failed to parse id: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var body struct {
+		Data json.RawMessage `json:"data"`
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		fmt.Println("Failed to decode json: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	benchmarkRow := BenchmarkRow{
+		BenchmarkID: benchmarkID,
+		Data:        body.Data,
+	}
+
+	fmt.Println(&benchmarkRow)
+
+	err = b.Actions.InsertDataByID(benchmarkRow)
+	if err != nil {
+		fmt.Println("Failed to Insert: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
